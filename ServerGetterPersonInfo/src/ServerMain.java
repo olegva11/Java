@@ -334,7 +334,7 @@ public class ServerMain
 					return userDBHelper.getUserId(email);
 				}
 			}
-			else
+
 			{
 				return -1;
 			}
