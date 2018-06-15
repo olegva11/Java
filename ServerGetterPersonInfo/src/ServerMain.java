@@ -100,152 +100,151 @@ public class ServerMain
 					commandFromClient = jsonObject.getJSONObject("serverCommand").getString("command");
 					System.out.println("Command: " + commandFromClient);
 
-						// Get information from json
-						informationFromClient = jsonObject.getJSONObject("personInfo");
-						System.out.println("Information: " + informationFromClient);
+					// Get information from json
+					informationFromClient = jsonObject.getJSONObject("personInfo");
+					System.out.println("Information: " + informationFromClient);
 
-						if (commandFromClient.equals(LOGIN_USER))
+					if (commandFromClient.equals(LOGIN_USER))
+					{
+						idUser = loginUser(informationFromClient);
+
+						if (idUser != -1)
 						{
-							idUser = loginUser(informationFromClient);
+							// send message to client
 
-							if (idUser != -1)
-							{
-								// send message to client
+							PersonAccount pAccount = PersonAccount.fillUserInfo(idUser);
 
-								PersonAccount pAccount = PersonAccount.fillUserInfo(idUser);
+							JSONObject jsonToClient = senderClient.generateJson(LOGIN_USER, pAccount.getJSONObject());
 
-								JSONObject jsonToClient = senderClient.generateJson(LOGIN_USER,
-										pAccount.getJSONObject());
+							System.out.println(jsonToClient);
 
-								System.out.println(jsonToClient);
-
-								String infoToClient = new String(jsonToClient.toString().getBytes(UTF8), WIN1251);
-								System.out.println(infoToClient);
-								out.println(infoToClient);
-								out.flush();
-
-								System.out.println("Return info to client");
-							} else
-							{
-								System.out.println("Message not send");
-							}
-						}
-
-						if (commandFromClient.equals(REGISTER_USER))
-						{
-							idUser = registerNewUser(informationFromClient);
-
-							if (idUser != -1)
-							{
-								PersonAccount pAccount = PersonAccount.fillUserInfo(idUser);
-
-								JSONObject jsonFromClient = pAccount.getJSONObject();
-								JSONObject jsonToClient = senderClient.generateJson(REGISTER_USER, jsonFromClient);
-
-								System.out.println(jsonToClient.toString());
-
-								String infoToClient = new String(jsonToClient.toString().getBytes(UTF8), WIN1251);
-								System.out.println(infoToClient);
-								out.println(infoToClient);
-								out.flush();
-
-								System.out.println("Send message to client");
-							} else
-							{
-								System.out.println("Message not send");
-							}
-						}
-
-						if (commandFromClient.equals(UPDATE_USER))
-						{
-							long countUpdateRows;
-							countUpdateRows = updateUserInformation(informationFromClient);
-
-							saveInfoToFile(jsonObject);
-							JSONObject jsonInfo = new JSONObject();
-							JSONObject json = new JSONObject();
-
-							if (countUpdateRows > 0)
-							{
-								jsonInfo.put("result", "true");
-							} else
-							{
-								jsonInfo.put("result", "false");
-							}
-
-							json.put(UserTableJSONTitle.NameTitle, jsonInfo);
-
-							System.out.println("Update count rows:" + countUpdateRows + "\n json: " + json.toString());
-
-							JSONObject jsonToClient = senderClient.generateJson(UPDATE_USER, json);
-
-							System.out.println(jsonToClient.toString());
-							out.println(jsonToClient.toString());
+							String infoToClient = new String(jsonToClient.toString().getBytes(UTF8), WIN1251);
+							System.out.println(infoToClient);
+							out.println(infoToClient);
 							out.flush();
 
 							System.out.println("Return info to client");
-						}
-
-						// GET_ID for new user, and send to client(mobile)
-						if (commandFromClient.equals(GET_ID))
+						} else
 						{
-							// init output stream(for send information to
-							// client)
-							dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
-
-							// dataOutputStream.write(randNumber);
-						}
-
-						// Save information from user to file
-						if (commandFromClient.equals(SAVE_INFO_FILE))
-						{
-							// Get date now
-
-							if (jsonObject != null)
-							{
-								saveInfoToFile(jsonObject);
-							}
-						}
-
-						if (commandFromClient.equals(MODEL_PROPERTIES))
-						{
-							saveModelProportiesToFile(jsonObject);
-							JSONObject smallJson = jsonObject.getJSONObject("ModelProporties");
-							try
-							{
-
-								saveInfoToFile(jsonObject);
-								System.out.println("Model properties");
-
-								int id = jsonObject.getJSONObject("personInfo").getInt("id");
-								
-								DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss");
-								
-								String dat = dateFormat.format(date).toString();
-								dat = dat + ".txt";
-								Process p = Runtime.getRuntime()
-										.exec("rundll32 SHELL32.DLL,ShellExec_RunDLL " + "D:\\test\\UM_mhealth.exe "
-												+ FileEditor.DEFAULT_DIRECTORY + "\\" + id + "\\" + dat);
-								// Process p = new
-								// ProcessBuilder("D:\\test\\ServerTest.exe").start();
-								System.out.println("Run exe");
-							} catch (Exception ex)
-							{
-								System.out.println("error" + ex);
-							}
+							System.out.println("Message not send");
 						}
 					}
-					out.close();
-					inputStreamReader.close();
-					bufferedReader.close();
-					clientSocket.close();
 
-					System.out.println("Message Empty");
-					out.close();
-					inputStreamReader.close();
-					bufferedReader.close();
-					clientSocket.close();
-				
+					if (commandFromClient.equals(REGISTER_USER))
+					{
+						idUser = registerNewUser(informationFromClient);
+
+						if (idUser != -1)
+						{
+							PersonAccount pAccount = PersonAccount.fillUserInfo(idUser);
+
+							JSONObject jsonFromClient = pAccount.getJSONObject();
+							JSONObject jsonToClient = senderClient.generateJson(REGISTER_USER, jsonFromClient);
+
+							System.out.println(jsonToClient.toString());
+
+							String infoToClient = new String(jsonToClient.toString().getBytes(UTF8), WIN1251);
+							System.out.println(infoToClient);
+							out.println(infoToClient);
+							out.flush();
+
+							System.out.println("Send message to client");
+						} else
+						{
+							System.out.println("Message not send");
+						}
+					}
+
+					if (commandFromClient.equals(UPDATE_USER))
+					{
+						long countUpdateRows;
+						countUpdateRows = updateUserInformation(informationFromClient);
+
+						saveInfoToFile(jsonObject);
+						JSONObject jsonInfo = new JSONObject();
+						JSONObject json = new JSONObject();
+
+						if (countUpdateRows > 0)
+						{
+							jsonInfo.put("result", "true");
+						} else
+						{
+							jsonInfo.put("result", "false");
+						}
+
+						json.put(UserTableJSONTitle.NameTitle, jsonInfo);
+
+						System.out.println("Update count rows:" + countUpdateRows + "\n json: " + json.toString());
+
+						JSONObject jsonToClient = senderClient.generateJson(UPDATE_USER, json);
+
+						System.out.println(jsonToClient.toString());
+						out.println(jsonToClient.toString());
+						out.flush();
+
+						System.out.println("Return info to client");
+					}
+
+					// GET_ID for new user, and send to client(mobile)
+					if (commandFromClient.equals(GET_ID))
+					{
+						// init output stream(for send information to
+						// client)
+						dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
+
+						// dataOutputStream.write(randNumber);
+					}
+
+					// Save information from user to file
+					if (commandFromClient.equals(SAVE_INFO_FILE))
+					{
+						// Get date now
+
+						if (jsonObject != null)
+						{
+							saveInfoToFile(jsonObject);
+						}
+					}
+
+					if (commandFromClient.equals(MODEL_PROPERTIES))
+					{
+						saveModelProportiesToFile(jsonObject);
+						JSONObject smallJson = jsonObject.getJSONObject("ModelProporties");
+						try
+						{
+
+							saveInfoToFile(jsonObject);
+							System.out.println("Model properties");
+
+							int id = jsonObject.getJSONObject("personInfo").getInt("id");
+
+							DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss");
+
+							String dat = dateFormat.format(date).toString();
+							dat = dat + ".txt";
+							Process p = Runtime.getRuntime()
+									.exec("rundll32 SHELL32.DLL,ShellExec_RunDLL " + "D:\\test\\UM_mhealth.exe "
+											+ FileEditor.DEFAULT_DIRECTORY + "\\" + id + "\\" + dat);
+							// Process p = new
+							// ProcessBuilder("D:\\test\\ServerTest.exe").start();
+							System.out.println("Run exe");
+						} catch (Exception ex)
+						{
+							System.out.println("error" + ex);
+						}
+					}
+				}
+				out.close();
+				inputStreamReader.close();
+				bufferedReader.close();
+				clientSocket.close();
+
+				System.out.println("Message Empty");
+				out.close();
+				inputStreamReader.close();
+				bufferedReader.close();
+				clientSocket.close();
+
 			} catch (JSONException e)
 			{
 				// TODO Auto-generated catch block
@@ -335,8 +334,7 @@ public class ServerMain
 					return userDBHelper.getUserId(email);
 				}
 			}
-
-			// if user have account, return your id from DB
+			else
 			{
 				return -1;
 			}
